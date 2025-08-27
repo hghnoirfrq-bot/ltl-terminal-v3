@@ -3,8 +3,8 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 // --- Configuration ---
-const API_URL = 'http://localhost:5000/api';
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_51S0XueGmLSn1r7SlUqilbMsTB4kjNAELiq6T1VKecu6MBpgfve21jY3lIuTRZSYqbFPQj6UG5Roehsp8rhMFAZKz00zpIYbuPT';
+const API_URL = process.env.REACT_APP_API_URL;
+const STRIPE_PUBLISHABLE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 const BookingView = ({ setView }) => {
