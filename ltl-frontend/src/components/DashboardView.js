@@ -145,6 +145,49 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
       </a>
     );
   };
+  
+  // --- NEW: Function to handle file deletion ---
+  const handleDeleteFile = async (fileId) => {
+    if (window.confirm("Are you sure you want to delete this file?")) {
+      try {
+        const response = await fetch(`${API_URL}/projects/${currentUser.email}/files/${fileId}`, {
+          method: 'DELETE',
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert('File deleted successfully!');
+          setFiles(prevFiles => prevFiles.filter(file => file._id !== fileId));
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        alert(`Error deleting file: ${error.message}`);
+      }
+    }
+  };
+
+  // --- NEW: Function to handle booking cancellation ---
+  const handleCancelBooking = async (bookingId) => {
+    if (window.confirm("Are you sure you want to cancel this booking?")) {
+      try {
+        const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'canceled' }),
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert('Booking canceled successfully!');
+          setBookings(prevBookings => prevBookings.map(b => b._id === bookingId ? { ...b, status: 'canceled' } : b));
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        alert(`Error canceling booking: ${error.message}`);
+      }
+    }
+  };
+
 
   return (
     <div>
@@ -188,6 +231,11 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
                   <p>Format: {booking.sessionFormat}</p>
                   <p>Booked on: {new Date(booking.dateBooked).toLocaleDateString()}</p>
                   <span className={`status-badge status-${booking.status}`}>{booking.status}</span>
+                  {booking.status !== 'canceled' && (
+                    <button className="btn btn-secondary" style={{marginTop: '10px'}} onClick={() => handleCancelBooking(booking._id)}>
+                      Cancel Booking
+                    </button>
+                  )}
                 </div>
               )) : <p style={{ color: '#888', fontSize: '12px' }}>No active bookings found.</p>}
             </div>
@@ -197,9 +245,11 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
             <div id="files-list">
               {files.length > 0 ? files.map(file => (
                 <div key={file._id} className="project-card">
-                  {/* --- UPDATED: Use the renderFile function here --- */}
                   {renderFile(file)}
                   <p style={{marginTop: '10px'}}>Uploaded on: {new Date(file.uploadDate).toLocaleDateString()}</p>
+                  <button className="btn btn-secondary" style={{marginTop: '10px'}} onClick={() => handleDeleteFile(file._id)}>
+                    Delete File
+                  </button>
                 </div>
               )) : <p style={{ color: '#888', fontSize: '12px' }}>No files uploaded yet.</p>}
             </div>

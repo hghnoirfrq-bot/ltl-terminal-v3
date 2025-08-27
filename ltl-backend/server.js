@@ -205,6 +205,53 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
+
+// --- NEW ENDPOINTS ---
+
+// Delete a file from a project
+app.delete('/api/projects/:userEmail/files/:fileId', async (req, res) => {
+    try {
+        const { userEmail, fileId } = req.params;
+        const project = await Project.findOne({ userEmail });
+        if (!project) {
+            return res.status(404).json({ success: false, error: 'Project not found.' });
+        }
+        const initialFileCount = project.files.length;
+        project.files.pull({ _id: fileId });
+        await project.save();
+
+        if (project.files.length < initialFileCount) {
+            res.json({ success: true, message: 'File deleted successfully.' });
+        } else {
+            res.status(404).json({ success: false, error: 'File not found.' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Update the status of a booking (e.g., to 'canceled')
+app.put('/api/bookings/:bookingId', async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const { status } = req.body;
+        const booking = await Booking.findByIdAndUpdate(
+            bookingId,
+            { status: status },
+            { new: true }
+        );
+        if (!booking) {
+            return res.status(404).json({ success: false, error: 'Booking not found.' });
+        }
+        res.json({ success: true, booking });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// --- END OF NEW ENDPOINTS ---
+
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
