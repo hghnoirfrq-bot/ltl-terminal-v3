@@ -127,6 +127,7 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
   // --- NEW: Helper function to render the correct file interaction ---
   const renderFile = (file) => {
     const isAudio = /\.(mp3|wav|ogg|m4a)$/i.test(file.fileName);
+    const isVideo = /\.(mp4|mov|webm)$/i.test(file.fileName); // ADDED
 
     if (isAudio) {
       return (
@@ -135,6 +136,15 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
           <audio controls src={file.fileUrl} style={{width: '100%', marginTop: '10px'}}>
             Your browser does not support the audio element.
           </audio>
+        </>
+      );
+    } else if (isVideo) { // ADDED
+      return (
+        <>
+          <p style={{color: '#00ff00'}}>{file.fileName}</p>
+          <video controls src={file.fileUrl} style={{width: '100%', marginTop: '10px'}}>
+            Your browser does not support the video tag.
+          </video>
         </>
       );
     }
