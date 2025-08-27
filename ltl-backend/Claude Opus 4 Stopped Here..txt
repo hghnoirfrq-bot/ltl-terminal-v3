@@ -1,0 +1,809 @@
+Claude Opus 4 Stopped Here. Need to finish this. I need to get this done. I'm learning how to use the MERN stack as a beginner coder. Do not assume that I know anything about coding/programming/developing. 
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUCTHELEO Terminal - Creative Coaching System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #0a0a0a;
+            color: #00ff00;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Matrix Background */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .matrix-column {
+            position: absolute;
+            top: -100%;
+            font-size: 20px;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+            animation: matrix-fall linear infinite;
+        }
+        
+        @keyframes matrix-fall {
+            to {
+                top: 100%;
+            }
+        }
+        
+        /* Terminal Container */
+        .terminal-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Terminal Window */
+        .terminal-window {
+            background-color: rgba(20, 20, 20, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .terminal-header {
+            background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .terminal-button.red { background-color: #ff5f56; }
+        .terminal-button.yellow { background-color: #ffbd2e; }
+        .terminal-button.green { background-color: #27c93f; }
+        
+        .terminal-title {
+            margin-left: auto;
+            margin-right: auto;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .terminal-body {
+            padding: 20px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        /* Terminal Output */
+        .terminal-output {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .terminal-line {
+            margin-bottom: 10px;
+        }
+        
+        .command-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .prompt {
+            color: #00ff00;
+            margin-right: 10px;
+        }
+        
+        #terminal-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            flex: 1;
+            outline: none;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: #00ff00;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Navigation Cards */
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .nav-card {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.05));
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.3);
+            border-color: #00ff00;
+        }
+        
+        .nav-card h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .nav-card p {
+            color: #888;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        /* Forms */
+        .form-container {
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 20px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ff00;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 0, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        /* Dashboard Styles */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .sidebar {
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .main-content {
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .project-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .project-card:hover {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-active { background: rgba(0, 255, 0, 0.3); color: #00ff00; }
+        .status-pending { background: rgba(255, 255, 0, 0.3); color: #ffff00; }
+        .status-complete { background: rgba(0, 150, 255, 0.3); color: #0096ff; }
+        
+        /* Messages */
+        .message-container {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .message.sent {
+            background: rgba(0, 255, 0, 0.1);
+            margin-left: 20%;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .message.received {
+            background: rgba(100, 100, 100, 0.1);
+            margin-right: 20%;
+            border: 1px solid rgba(100, 100, 100, 0.3);
+        }
+        
+        .message-input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .message-input-container input {
+            flex: 1;
+        }
+        
+        /* Hidden by default */
+        .view {
+            display: none;
+        }
+        
+        .view.active {
+            display: block;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            color: #00ff00;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .alert-success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .alert-error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            border-top: 2px solid #00ff00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Background -->
+    <div id="matrix-bg"></div>
+    
+    <div class="terminal-container">
+        <!-- Alert Container -->
+        <div id="alert-container"></div>
+        
+        <!-- Main Terminal View -->
+        <div id="terminal-view" class="view active">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-button red"></span>
+                    <span class="terminal-button yellow"></span>
+                    <span class="terminal-button green"></span>
+                    <span class="terminal-title">LUCTHELEO TERMINAL v2.0 - Connected to Backend</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-output" id="terminal-output">
+                        <div class="terminal-line">╔════════════════════════════════════════════════════╗</div>
+                        <div class="terminal-line">║     LUCTHELEO TERMINAL - CREATIVE COACHING        ║</div>
+                        <div class="terminal-line">║   Alternative R&B • Cyber Neo Louisiana • Music   ║</div>
+                        <div class="terminal-line">╚════════════════════════════════════════════════════╝</div>
+                        <div class="terminal-line"></div>
+                        <div class="terminal-line">Welcome to the LUCTHELEO creative ecosystem.</div>
+                        <div class="terminal-line">System Status: <span id="system-status">Checking...</span></div>
+                        <div class="terminal-line">Type 'help' for available commands or use the navigation below.</div>
+                        <div class="terminal-line"></div>
+                    </div>
+                    <div class="command-line">
+                        <span class="prompt">ltl@terminal:~$</span>
+                        <input type="text" id="terminal-input" autofocus>
+                        <span class="cursor"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Cards -->
+            <div class="nav-cards">
+                <div class="nav-card" onclick="showView('booking-view')">
+                    <h3>BOOK SESSION</h3>
+                    <p>Schedule your creative coaching session. Online or in-person. $75/hour.</p>
+                </div>
+                <div class="nav-card" onclick="showView('login-view')">
+                    <h3>CLIENT PORTAL</h3>
+                    <p>Access your dashboard, projects, and session history.</p>
+                </div>
+                <div class="nav-card" onclick="showView('portfolio-view')">
+                    <h3>PORTFOLIO</h3>
+                    <p>Explore LUCTHELEO's creative works and production showcase.</p>
+                </div>
+                <div class="nav-card" onclick="showView('stats-view')">
+                    <h3>SYSTEM STATUS</h3>
+                    <p>Live analytics and system performance metrics.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Booking View -->
+        <div id="booking-view" class="view">
+            <button class="btn btn-secondary" onclick="showView('terminal-view')">← Back to Terminal</button>
+            <div class="form-container">
+                <h2 style="color: #00ff00; margin-bottom: 20px;">Book Your Creative Session</h2>
+                <form id="booking-form">
+                    <div class="form-group">
+                        <label for="client-name">Full Name *</label>
+                        <input type="text" id="client-name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="client-email">Email Address *</label>
+                        <input type="email" id="client-email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="service-type">Service Type *</label>
+                        <select id="service-type" required>
+                            <option value="">Select a service...</option>
+                            <option value="music-production">Music Production - $75</option>
+                            <option value="creative-writing">Creative Writing Support - $75</option>
+                            <option value="concept-development">Concept Development - $75</option>
+                            <option value="building-strategy">Building Strategy - $75</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="session-format">Session Format *</label>
+                        <select id="session-format" required>
+                            <option value="">Select format...</option>
+                            <option value="online">Online (Discord)</option>
+                            <option value="in-person">In-Person (Atlanta Area)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preferred-date">Preferred Date</label>
+                        <input type="date" id="preferred-date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="experience-level">Experience Level</label>
+                        <select id="experience-level">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="project-description">Project Description *</label>
+                        <textarea id="project-description" required placeholder="Tell us about your creative project and goals..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="booking-submit">
+                        <span id="booking-btn-text">BOOK SESSION ($75)</span>
+                        <span id="booking-loading" class="loading" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Login View -->
+        <div id="login-view" class="view">
+            <button class="btn btn-secondary" onclick="showView('terminal-view')">← Back to Terminal</button>
+            <div class="form-container" style="max-width: 400px; margin: 50px auto;">
+                <h2 style="color: #00ff00; margin-bottom: 20px;">Client Portal Access</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn">ACCESS PORTAL</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view">
+            <button class="btn btn-secondary" onclick="logout()">← Logout</button>
+            <h2 style="color: #00ff00; margin: 20px 0;">Welcome back, <span id="user-name"></span></h2>
+            
+            <div class="dashboard">
+                <div class="sidebar">
+                    <h3 style="color: #00ff00; margin-bottom: 15px;">Quick Actions</h3>
+                    <button class="btn" style="width: 100%; margin-bottom: 10px;" onclick="showView('booking-view')">Book New Session</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">Upload Files</button>
+                    <button class="btn btn-secondary" style="width: 100%;">View Invoices</button>
+                    
+                    <h3 style="color: #00ff00; margin: 30px 0 15px;">Session History</h3>
+                    <div id="session-history"></div>
+                </div>
+                
+                <div class="main-content">
+                    <h3 style="color: #00ff00; margin-bottom: 15px;">Your Bookings</h3>
+                    <div id="bookings-list"></div>
+                    
+                    <h3 style="color: #00ff00; margin: 30px 0 15px;">Messages</h3>
+                    <div class="message-container" id="message-container"></div>
+                    <div class="message-input-container">
+                        <input type="text" id="message-input" placeholder="Type your message...">
+                        <button class="btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Portfolio View -->
+        <div id="portfolio-view" class="view">
+            <button class="btn btn-secondary" onclick="showView('terminal-view')">← Back to Terminal</button>
+            <h2 style="color: #00ff00; margin: 20px 0;">LUCTHELEO Portfolio</h2>
+            
+            <div class="nav-cards">
+                <div class="nav-card">
+                    <h3>Latest Track: "Cyber Dreams"</h3>
+                    <p>Alternative R&B production featuring ethereal vocals and futuristic soundscapes.</p>
+                </div>
+                <div class="nav-card">
+                    <h3>Studio Session: Beat Making</h3>
+                    <p>Watch the creative process behind building atmospheric trap-soul instrumentals.</p>
+                </div>
+                <div class="nav-card">
+                    <h3>Visual Art: Noir Expressions</h3>
+                    <p>Digital artwork exploring the intersection of technology and human emotion.</p>
+                </div>
+                <div class="nav-card">
+                    <h3>Writing Sample: "Terminal Love"</h3>
+                    <p>Lyrical exploration of connection in the digital age.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats View -->
+        <div id="stats-view" class="view">
+            <button class="btn btn-secondary" onclick="showView('terminal-view')">← Back to Terminal</button>
+            <h2 style="color: #00ff00; margin: 20px 0;">System Analytics</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="visitor-count">0</div>
+                    <div class="stat-label">Visitors Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="booking-count">0</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="user-count">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="db-status" style="font-size: 16px;">CHECKING...</div>
+                    <div class="stat-label">Database Status</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:5000/api';
+        
+        // Local storage for session
+        let currentUser = null;
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            createMatrixEffect();
+            checkSystemStatus();
+            loadStats();
+        });
+        
+        // Matrix Background Effect
+        function createMatrixEffect() {
+            const matrix = document.getElementById('matrix-bg');
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+            
+            for (let i = 0; i < 50; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = `${Math.random() * 100}%`;
+                column.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                column.style.animationDelay = `${Math.random() * 5}s`;
+                
+                let text = '';
+                for (let j = 0; j < 20; j++) {
+                    text += characters.charAt(Math.floor(Math.random() * characters.length)) + '<br>';
+                }
+                column.innerHTML = text;
+                
+                matrix.appendChild(column);
+            }
+        }
+        
+        // Check System Status
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch(`${API_URL}/test`);
+                const data = await response.json();
+                document.getElementById('system-status').innerHTML = 
+                    `<span style="color: #00ff00;">ONLINE - Database: ${data.database}</span>`;
+            } catch (error) {
+                document.getElementById('system-status').innerHTML = 
+                    `<span style="color: #ff0000;">OFFLINE - Backend not connected</span>`;
+            }
+        }
+        
+        // Load Stats
+        async function loadStats() {
+            try {
+                // Get bookings count
+                const bookingsResponse = await fetch(`${API_URL}/bookings`);
+                const bookings = await bookingsResponse.json();
+                document.getElementById('booking-count').textContent = bookings.length;
+                
+                // Get users count
+                const usersResponse = await fetch(`${API_URL}/users`);
+                const users = await usersResponse.json();
+                document.getElementById('user-count').textContent = users.length;
+                
+                // Update visitor count (simulated)
+                const visitorCount = parseInt(localStorage.getItem('visitorCount') || '0') + 1;
+                localStorage.setItem('visitorCount', visitorCount);
+                document.getElementById('visitor-count').textContent = visitorCount;
+                
+                // Update database status
+                document.getElementById('db-status').innerHTML = 
+                    '<span style="color: #00ff00;">CONNECTED</span>';
+            } catch (error) {
+                document.getElementById('db-status').innerHTML = 
+                    '<span style="color: #ff0000;">DISCONNECTED</span>';
+            }
+        }
+        
+        // Show Alert
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const container = document.getElementById('alert-container');
+            container.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        // Terminal Commands
+        const commands = {
+            help: () => {
+                return `Available commands:
+• help      - Display this help message
+• clear     - Clear terminal output
+• status    - Show system status
+• book      - Open booking system
+• login     - Access client portal
+• portfolio - View creative portfolio
+• about     - Learn about LUCTHELEO
+• stats     - View system analytics`;
+            },
+            clear: () => {
+                document.getElementById('terminal-output').innerHTML = '';
+                return '';
+            },
+            status: async () => {
+                await checkSystemStatus();
+                return 'System status updated.';
+            },
+            book: () => {
+                showView('booking-view');
+                return 'Opening booking system...';
+            },
+            login: () => {
+                showView('login-view');
+                return 'Accessing client portal...';
+            },
+            portfolio: () => {
+                showView('portfolio-view');
+                return 'Loading portfolio...';
+            },
+            about: () => {
+                return `LUCTHELEO Terminal v2.0
+Creative Coaching & Music Production
+Alternative R&B • Cyber Neo Louisiana
+Services: $75/session
+Contact: book@luctheleo.com`;
+            },
+            stats: () => {
+                showView('stats-view');
+                loadStats();
+                return 'Loading analytics...';
+            }
+        };
+        
+        // Terminal Input Handler
+        document.

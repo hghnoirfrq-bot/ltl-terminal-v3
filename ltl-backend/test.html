@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>LTL Backend Test</h1>
+    <button onclick="testBooking()">Test Booking</button>
+    <div id="result"></div>
+    
+    <script>
+        function testBooking() {
+            fetch('http://localhost:5000/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    clientName: 'Test Client',
+                    clientEmail: 'test@example.com',
+                    serviceType: 'Music Production',
+                    sessionFormat: 'online',
+                    projectDescription: 'Testing the database'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+                console.log(data);
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>
