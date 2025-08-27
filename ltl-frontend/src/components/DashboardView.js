@@ -247,7 +247,7 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
                 </div>
             ))
           ) : (
-            <p style={{ color: '#888', fontSize: '12px' }}>No conversations started yet.</p>
+            <p style={{ color: '#888', fontSize: '12px' }}>No conversations started yet. Send your first message!</p>
           )}
 
           <h3 style={{ color: '#00ff00', marginTop: '30px', marginBottom: '15px' }}>Quick Actions</h3>
