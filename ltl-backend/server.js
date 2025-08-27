@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const crypto = require('crypto');
+const cloudinary = require('cloudinary').v2; // ADDED
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const http = require('http');
@@ -11,6 +12,13 @@ const WebSocket = require('ws');
 
 const app = express();
 const server = http.createServer(app);
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 app.use(cors());
 app.use(express.json());
@@ -132,10 +140,15 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
         const { userEmail } = req.body;
-        const fileUrl = `https://fake-storage.com/${userEmail}/${req.file.originalname}`;
+        
+        // Use Cloudinary to upload the file from memory
+        const uploadResult = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+            resource_type: "auto"
+        });
+
         let project = await Project.findOne({ userEmail });
         if (!project) project = new Project({ userEmail, files: [] });
-        project.files.push({ fileName: req.file.originalname, fileUrl });
+        project.files.push({ fileName: req.file.originalname, fileUrl: uploadResult.secure_url });
         await project.save();
         res.json({ success: true, file: project.files[project.files.length - 1] });
     } catch (error) {
@@ -205,9 +218,6 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-
-// --- NEW ENDPOINTS ---
-
 // Delete a file from a project
 app.delete('/api/projects/:userEmail/files/:fileId', async (req, res) => {
     try {
@@ -248,8 +258,6 @@ app.put('/api/bookings/:bookingId', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-
-// --- END OF NEW ENDPOINTS ---
 
 
 const PORT = process.env.PORT || 5000;
