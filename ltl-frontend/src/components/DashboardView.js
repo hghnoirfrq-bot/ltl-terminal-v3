@@ -124,10 +124,9 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
     }
   };
 
-  // --- NEW: Helper function to render the correct file interaction ---
   const renderFile = (file) => {
     const isAudio = /\.(mp3|wav|ogg|m4a)$/i.test(file.fileName);
-    const isVideo = /\.(mp4|mov|webm)$/i.test(file.fileName); // ADDED
+    const isVideo = /\.(mp4|mov|webm|mpeg|avi|flv)$/i.test(file.fileName); // UPDATED
 
     if (isAudio) {
       return (
@@ -138,7 +137,7 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
           </audio>
         </>
       );
-    } else if (isVideo) { // ADDED
+    } else if (isVideo) {
       return (
         <>
           <p style={{color: '#00ff00'}}>{file.fileName}</p>
@@ -156,7 +155,6 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
     );
   };
   
-  // --- NEW: Function to handle file deletion ---
   const handleDeleteFile = async (fileId) => {
     if (window.confirm("Are you sure you want to delete this file?")) {
       try {
@@ -176,7 +174,6 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
     }
   };
 
-  // --- NEW: Function to handle booking cancellation ---
   const handleCancelBooking = async (bookingId) => {
     if (window.confirm("Are you sure you want to cancel this booking?")) {
       try {

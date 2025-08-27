@@ -4,7 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const crypto = require('crypto');
-const cloudinary = require('cloudinary').v2; // ADDED
+const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const http = require('http');
@@ -34,11 +34,24 @@ mongoose.connect(process.env.MONGODB_URI)
 const bookingSchema = new mongoose.Schema({ clientName: String, clientEmail: String, serviceType: String, sessionFormat: String, preferredDate: String, experienceLevel: String, projectDescription: String, status: { type: String, default: 'pending' }, price: { type: Number, default: 75 }, paymentIntentId: String, dateBooked: { type: Date, default: Date.now } });
 const userSchema = new mongoose.Schema({ name: String, email: { type: String, unique: true }, password: String, dateCreated: { type: Date, default: Date.now }, resetPasswordToken: String, resetPasswordExpires: Date });
 const projectSchema = new mongoose.Schema({ userEmail: String, files: [{ fileName: String, fileUrl: String, uploadDate: { type: Date, default: Date.now } }] });
-const messageSchema = new mongoose.Schema({ userEmail: { type: String, required: true }, sender: { type: String, required: true, enum: ['user', 'admin'] }, content: { type: String, required: true }, timestamp: { type: Date, default: Date.now } });
+
+const conversationSchema = new mongoose.Schema({
+    participants: [{ type: String, required: true }],
+    lastMessageAt: { type: Date, default: Date.now }
+});
+
+const messageSchema = new mongoose.Schema({
+    conversationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
+    sender: { type: String, required: true, enum: ['user', 'admin'] },
+    content: { type: String, required: true },
+    readStatus: { type: Boolean, default: false },
+    timestamp: { type: Date, default: Date.now }
+});
 
 const Booking = mongoose.model('Booking', bookingSchema);
 const User = mongoose.model('User', userSchema);
 const Project = mongoose.model('Project', projectSchema);
+const Conversation = mongoose.model('Conversation', conversationSchema);
 const Message = mongoose.model('Message', messageSchema);
 
 // --- WebSocket Server ---
@@ -46,8 +59,21 @@ const wss = new WebSocket.Server({ server });
 wss.on('connection', ws => {
     ws.on('message', async (message) => {
         const data = JSON.parse(message);
-        const newMessage = new Message({ userEmail: data.userEmail, sender: data.sender, content: data.content });
+        // Find or create a conversation
+        let conversation = await Conversation.findOne({ participants: { $all: [data.userEmail, 'admin'] } });
+        if (!conversation) {
+            conversation = new Conversation({ participants: [data.userEmail, 'admin'] });
+            await conversation.save();
+        }
+
+        const newMessage = new Message({
+            conversationId: conversation._id,
+            sender: data.sender,
+            content: data.content
+        });
         await newMessage.save();
+
+        // Broadcast message to all clients in the same conversation
         wss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(newMessage));
@@ -114,14 +140,39 @@ app.put('/api/user/change-password', async (req, res) => {
     }
 });
 
-app.get('/api/messages/:userEmail', async (req, res) => {
+// NEW: Get list of conversations for a user
+app.get('/api/conversations/:userEmail', async (req, res) => {
     try {
-        const messages = await Message.find({ userEmail: req.params.userEmail }).sort({ timestamp: 1 });
+        const conversations = await Conversation.find({ participants: req.params.userEmail }).sort({ lastMessageAt: -1 });
+        res.json(conversations);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// UPDATED: Get messages for a specific conversation
+app.get('/api/messages/:conversationId', async (req, res) => {
+    try {
+        const messages = await Message.find({ conversationId: req.params.conversationId }).sort({ timestamp: 1 });
         res.json(messages);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
+
+// NEW: Mark messages in a conversation as read
+app.put('/api/messages/read/:conversationId', async (req, res) => {
+    try {
+        await Message.updateMany(
+            { conversationId: req.params.conversationId, sender: 'admin', readStatus: false },
+            { $set: { readStatus: true } }
+        );
+        res.json({ success: true, message: 'Messages marked as read.' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 
 app.post('/api/create-payment-intent', async (req, res) => {
     try {
@@ -141,7 +192,6 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
         if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
         const { userEmail } = req.body;
         
-        // Use Cloudinary to upload the file from memory
         const uploadResult = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
             resource_type: "auto"
         });
@@ -218,6 +268,7 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
+
 // Delete a file from a project
 app.delete('/api/projects/:userEmail/files/:fileId', async (req, res) => {
     try {
@@ -258,7 +309,6 @@ app.put('/api/bookings/:bookingId', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
