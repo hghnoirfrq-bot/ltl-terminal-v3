@@ -20,7 +20,6 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
   const ws = useRef(null);
   const messageContainerRef = useRef(null);
 
-  // Initial data fetch
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -48,20 +47,7 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
     };
     fetchData();
   }, [currentUser.email]);
-  
-  // Fetch messages for the selected conversation
-  useEffect(() => {
-      const fetchMessages = async () => {
-          if (currentConversation) {
-              const messagesRes = await fetch(`${API_URL}/messages/${currentConversation._id}`);
-              const messageHistory = await messagesRes.json();
-              setMessages(messageHistory);
-          }
-      };
-      fetchMessages();
-  }, [currentConversation]);
 
-  // WebSocket connection
   useEffect(() => {
     if (!currentConversation) return;
       
@@ -77,7 +63,6 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
     return () => ws.current.close();
   }, [currentConversation]);
   
-  // Scroll to bottom of message container
   useEffect(() => {
     if (messageContainerRef.current) {
         messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
@@ -224,7 +209,6 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
       <button className="btn btn-secondary" onClick={handleLogout}>← Logout</button>
       <h2 style={{ color: '#00ff00', margin: '20px 0' }}>Welcome back, {currentUser.name}</h2>
       <div className="dashboard">
-        {/* New Conversation List Sidebar */}
         <div className="sidebar" style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
           <h3 style={{ color: '#00ff00', marginBottom: '15px' }}>Conversations</h3>
           {conversations.length > 0 ? (
@@ -265,7 +249,6 @@ const DashboardView = ({ currentUser, setCurrentUser, setView }) => {
           </form>
         </div>
         
-        {/* Main Content Area */}
         <div className="main-content">
           <h3 style={{ color: '#00ff00', marginBottom: '15px' }}>Messages</h3>
           <div className="message-container" ref={messageContainerRef}>
