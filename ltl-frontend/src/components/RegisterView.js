@@ -1,109 +1,147 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
-const TerminalView = ({ setView }) => {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState([
-    { type: 'line', text: '╔════════════════════════════════════════════════════╗' },
-    { type: 'line', text: '║     LUCTHELEO TERMINAL - CREATIVE COACHING        ║' },
-    { type: 'line', text: '║   Alternative R&B • Cyber Neo Louisiana • Music   ║' },
-    { type: 'line', text: '╚════════════════════════════════════════════════════╝' },
-    { type: 'line', text: '' },
-    { type: 'line', text: 'Welcome to the LUCTHELEO creative ecosystem (React Version).' },
-    { type: 'line', text: 'System Status: ONLINE' },
-    { type: 'line', text: "Type 'help' for available commands or use the navigation below." },
-  ]);
-  const terminalBodyRef = useRef(null);
+const API_URL = process.env.REACT_APP_API_URL;
 
-  useEffect(() => {
-    if (terminalBodyRef.current) {
-      terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight;
+const RegisterView = ({ setView }) => {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setIsLoading(false);
+      return;
     }
-  }, [output]);
 
-  const commands = {
-    help: () => `Available commands:\n• help\n• clear\n• status\n• book\n• register\n• login\n• portfolio\n• about\n• stats`,
-    clear: () => { setOutput([]); return ''; },
-    book: () => { setView('booking'); return 'Opening booking system...'; },
-    register: () => { setView('register'); return 'Opening registration portal...'; },
-    login: () => { setView('login'); return 'Accessing client portal...'; },
-    portfolio: () => { setView('portfolio'); return 'Loading portfolio...'; },
-    stats: () => { setView('stats'); return 'Loading analytics...'; },
-    about: () => `LUCTHELEO Terminal v3.0\nCreative Coaching & Music Production\nServices: $75/session`,
-    status: () => 'System Status: ONLINE (React Version)'
-  };
-
-  const handleCommand = (e) => {
-    if (e.key === 'Enter') {
-      const command = input.trim().toLowerCase();
-      const newOutput = [...output, { type: 'command', text: command }];
-      if (command) {
-        const commandOutput = commands[command] ? commands[command]() : `Command not found: ${command}.`;
-        if (commandOutput) {
-          newOutput.push({ type: 'line', text: commandOutput });
-        }
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Registration failed.');
       }
-      setOutput(newOutput);
-      setInput('');
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div>
-      <div className="terminal-window">
-        <div className="terminal-header">
-          <span className="terminal-button red"></span>
-          <span className="terminal-button yellow"></span>
-          <span className="terminal-button green"></span>
-          <span className="terminal-title">LUCTHELEO TERMINAL v3.0 - REACT EDITION</span>
-        </div>
-        <div className="terminal-body" ref={terminalBodyRef}>
-          <div className="terminal-output">
-            {output.map((line, index) => (
-              <div key={index} className="terminal-line">
-                {line.type === 'command' && <span className="prompt">ltl@terminal:~$ </span>}
-                {line.text}
-              </div>
-            ))}
-          </div>
-          <div className="command-line">
-            <span className="prompt">ltl@terminal:~$</span>
-            <input 
-              type="text" 
-              className="terminal-input" 
-              autoFocus 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)} 
-              onKeyDown={handleCommand} 
-            />
-            <span className="cursor"></span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="nav-cards">
-        <div className="nav-card" onClick={() => setView('booking')}>
-          <h3>BOOK SESSION</h3>
-          <p>Schedule your creative coaching session. $75/hour.</p>
-        </div>
-        <div className="nav-card" onClick={() => setView('register')}>
-          <h3>CREATE ACCOUNT</h3>
-          <p>Join the LUCTHELEO ecosystem and unlock exclusive features.</p>
-        </div>
-        <div className="nav-card" onClick={() => setView('login')}>
-          <h3>CLIENT PORTAL</h3>
-          <p>Access your dashboard, projects, and session history.</p>
-        </div>
-        <div className="nav-card" onClick={() => setView('portfolio')}>
-          <h3>PORTFOLIO</h3>
-          <p>Explore LUCTHELEO's creative works.</p>
-        </div>
-        <div className="nav-card" onClick={() => setView('stats')}>
-          <h3>SYSTEM STATUS</h3>
-          <p>Live analytics and system performance metrics.</p>
+      <button className="btn btn-secondary" onClick={() => setView('terminal')}>
+        ← Back to Terminal
+      </button>
+      <div className="form-container" style={{ maxWidth: '400px', margin: '50px auto' }}>
+        <h2 style={{ color: '#00ff00', marginBottom: '20px' }}>CREATE ACCOUNT</h2>
+        
+        {success ? (
+          <p style={{ color: '#00ff00', textAlign: 'center', fontSize: '14px' }}>
+            Account created successfully! You can now log in.
+          </p>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="register-name">Full Name</label>
+              <input 
+                type="text" 
+                id="register-name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                required 
+                placeholder="Enter your full name"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="register-email">Email Address</label>
+              <input 
+                type="email" 
+                id="register-email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
+                placeholder="Enter your email address"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="register-password">Password</label>
+              <input 
+                type="password" 
+                id="register-password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                placeholder="Create a password"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="confirm-password">Confirm Password</label>
+              <input 
+                type="password" 
+                id="confirm-password" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                required 
+                placeholder="Re-enter your password"
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              className="btn" 
+              disabled={isLoading}
+              style={{ width: '100%', marginTop: '10px' }}
+            >
+              {isLoading ? <div className="loading"></div> : 'CREATE ACCOUNT'}
+            </button>
+            
+            {error && (
+              <p style={{ 
+                color: '#ff0000', 
+                marginTop: '15px', 
+                textAlign: 'center',
+                fontSize: '14px' 
+              }}>
+                {error}
+              </p>
+            )}
+          </form>
+        )}
+        
+        <div style={{ 
+          marginTop: '25px', 
+          paddingTop: '20px', 
+          borderTop: '1px solid rgba(0, 255, 0, 0.2)',
+          textAlign: 'center'
+        }}>
+          <p style={{ color: '#888', fontSize: '12px', marginBottom: '10px' }}>
+            Already have an account?
+          </p>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setView('login')}
+            style={{ width: '100%' }}
+          >
+            Sign In Instead
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default TerminalView;
+export default RegisterView;
