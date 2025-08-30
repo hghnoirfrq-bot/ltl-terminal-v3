@@ -3,37 +3,62 @@ import React, { useState } from 'react';
 const API_URL = process.env.REACT_APP_API_URL;
 
 const RegisterView = ({ setView }) => {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prevData => ({ ...prevData, [id]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
-    setSuccess(false);
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      setIsLoading(false);
+    
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
-
+    
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+    
+    setIsLoading(true);
+    
     try {
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        })
       });
+      
       const result = await response.json();
+      
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Registration failed.');
+        throw new Error(result.error || 'Registration failed');
       }
+      
       setSuccess(true);
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        setView('login');
+      }, 2000);
+      
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,56 +71,72 @@ const RegisterView = ({ setView }) => {
       <button className="btn btn-secondary" onClick={() => setView('terminal')}>
         ← Back to Terminal
       </button>
-      <div className="form-container" style={{ maxWidth: '400px', margin: '50px auto' }}>
-        <h2 style={{ color: '#00ff00', marginBottom: '20px' }}>CREATE ACCOUNT</h2>
+      
+      <div className="form-container" style={{ maxWidth: '450px', margin: '50px auto' }}>
+        <h2 style={{ color: '#00ff00', marginBottom: '20px' }}>Create Your Account</h2>
+        
+        <p style={{ color: '#888', fontSize: '12px', marginBottom: '25px' }}>
+          Join the LUCTHELEO creative ecosystem and access exclusive features.
+        </p>
         
         {success ? (
-          <p style={{ color: '#00ff00', textAlign: 'center', fontSize: '14px' }}>
-            Account created successfully! You can now log in.
-          </p>
+          <div style={{ 
+            backgroundColor: 'rgba(0, 255, 0, 0.1)', 
+            border: '1px solid #00ff00',
+            borderRadius: '4px',
+            padding: '15px',
+            marginBottom: '20px'
+          }}>
+            <p style={{ color: '#00ff00', margin: 0 }}>
+              ✓ Registration successful! Redirecting to login...
+            </p>
+          </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="register-name">Full Name</label>
-              <input 
-                type="text" 
-                id="register-name" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                required 
+              <label htmlFor="name">Full Name *</label>
+              <input
+                type="text"
+                id="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
                 placeholder="Enter your full name"
               />
             </div>
+            
             <div className="form-group">
-              <label htmlFor="register-email">Email Address</label>
-              <input 
-                type="email" 
-                id="register-email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
-                placeholder="Enter your email address"
+              <label htmlFor="email">Email Address *</label>
+              <input
+                type="email"
+                id="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                placeholder="your@email.com"
               />
             </div>
+            
             <div className="form-group">
-              <label htmlFor="register-password">Password</label>
-              <input 
-                type="password" 
-                id="register-password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
-                placeholder="Create a password"
+              <label htmlFor="password">Password *</label>
+              <input
+                type="password"
+                id="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                placeholder="Minimum 6 characters"
               />
             </div>
+            
             <div className="form-group">
-              <label htmlFor="confirm-password">Confirm Password</label>
-              <input 
-                type="password" 
-                id="confirm-password" 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                required 
+              <label htmlFor="confirmPassword">Confirm Password *</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                required
                 placeholder="Re-enter your password"
               />
             </div>
