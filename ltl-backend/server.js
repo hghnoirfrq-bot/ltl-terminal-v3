@@ -268,6 +268,82 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
+// Add this endpoint to your server.js file, after the existing /api/login endpoint
+
+app.post('/api/register', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        
+        // Validation
+        if (!name || !email || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'All fields are required.' 
+            });
+        }
+        
+        if (password.length < 6) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Password must be at least 6 characters long.' 
+            });
+        }
+        
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'An account with this email already exists.' 
+            });
+        }
+        
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        // Create new user
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword
+        });
+        
+        await newUser.save();
+        
+        // Create an initial conversation for the user
+        const conversation = new Conversation({
+            participants: [email, 'admin']
+        });
+        await conversation.save();
+        
+        // Send a welcome message
+        const welcomeMessage = new Message({
+            conversationId: conversation._id,
+            sender: 'admin',
+            content: `Welcome to LUCTHELEO Terminal, ${name}! I'm here to help you with your creative journey. Feel free to reach out with any questions about booking sessions, uploading files, or anything else you need.`
+        });
+        await welcomeMessage.save();
+        
+        res.json({ 
+            success: true, 
+            message: 'Registration successful!',
+            user: {
+                name: newUser.name,
+                email: newUser.email,
+                id: newUser._id
+            }
+        });
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'An error occurred during registration. Please try again.' 
+        });
+    }
+});
+
 
 // Delete a file from a project
 app.delete('/api/projects/:userEmail/files/:fileId', async (req, res) => {

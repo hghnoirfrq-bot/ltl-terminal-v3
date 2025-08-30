@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom'; // Import router components
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 
 // Import all the view components
@@ -10,7 +10,8 @@ import DashboardView from './components/DashboardView';
 import PortfolioView from './components/PortfolioView';
 import StatsView from './components/StatsView';
 import ForgotPasswordView from './components/ForgotPasswordView';
-import ResetPasswordView from './components/ResetPasswordView'; // New import
+import ResetPasswordView from './components/ResetPasswordView';
+import RegisterView from './components/RegisterView'; // NEW IMPORT
 
 function App() {
   return (
@@ -19,9 +20,7 @@ function App() {
       <div className="alert-container"></div>
       <div className="terminal-container">
         <Routes>
-          {/* Route for the main application */}
           <Route path="/" element={<MainApp />} />
-          {/* Route for the password reset page */}
           <Route path="/reset/:token" element={<ResetPasswordView />} />
         </Routes>
       </div>
@@ -29,15 +28,12 @@ function App() {
   );
 }
 
-// We've moved the original app logic into its own component
-// so the router can manage what's being displayed.
 const MainApp = () => {
   const [view, setView] = useState('terminal');
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
   const handleSetView = (newView) => {
-    // This makes sure we are at the base URL when changing views
     navigate('/'); 
     setView(newView);
   }
@@ -65,6 +61,8 @@ const MainApp = () => {
         return <BookingView setView={handleSetView} />;
       case 'login':
         return <LoginView setView={handleSetView} setCurrentUser={setCurrentUser} />;
+      case 'register':  // NEW CASE
+        return <RegisterView setView={handleSetView} />;
       case 'portfolio':
         return <PortfolioView setView={handleSetView} />;
       case 'stats':
